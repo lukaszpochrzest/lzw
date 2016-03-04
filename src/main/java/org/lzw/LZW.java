@@ -171,7 +171,7 @@ public final class LZW {
 
         out.println("Encoding: " + dataString);
 
-        byte[] data = dataString.getBytes(StandardCharsets.US_ASCII);
+        byte[] data = dataString.getBytes(StandardCharsets.UTF_8);
         int[] indexes = LZW.encode(data);
 
         out.println("Result:" + System.lineSeparator() +
@@ -183,7 +183,7 @@ public final class LZW {
 
         byte[] decodedData = LZW.decode(indexes);
 
-        out.println("Result:" + new String(decodedData, StandardCharsets.US_ASCII) + System.lineSeparator());
+        out.println("Result:" + new String(decodedData, StandardCharsets.UTF_8) + System.lineSeparator());
 
 //        /** this works! - prints 'a'*/
 //        int i = 97; //  ascii 'a'
