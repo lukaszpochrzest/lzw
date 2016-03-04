@@ -41,7 +41,8 @@ public final class LZW {
             //  read s symbol
             byte s = data[i];
 
-            if(contains(dictionary, c, s)) {
+//            if(contains(dictionary, c, s)) {
+            if(dictionary.contains(c, s)) {
                 //   c := c + s
                 c.add(s);
             } else {
@@ -138,32 +139,32 @@ public final class LZW {
         return toArray(result);
     }
 
-    private static boolean contains(final Dictionary dictionary,
-                                    final LinkedList<Byte> c, final byte s) {
-        for(byte[] word : dictionary) {
-            if(c.size() + 1 == word.length) {
-                boolean equalUpToS = true;
-
-                Iterator<Byte> sequenceIter = c.iterator();
-                int wordInd = 0;
-                while(sequenceIter.hasNext()) {
-                    Byte seqC = sequenceIter.next();
-                    byte wordC = word[wordInd];
-                    if(wordC != seqC) {
-                        equalUpToS = false;
-                        break;
-                    }
-                    ++wordInd;
-                }
-                if(equalUpToS) {
-                    if(word[wordInd] == s) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
+//    private static boolean contains(final Dictionary dictionary,
+//                                    final LinkedList<Byte> c, final byte s) {
+//        for(byte[] word : dictionary) {
+//            if(c.size() + 1 == word.length) {
+//                boolean equalUpToS = true;
+//
+//                Iterator<Byte> sequenceIter = c.iterator();
+//                int wordInd = 0;
+//                while(sequenceIter.hasNext()) {
+//                    Byte seqC = sequenceIter.next();
+//                    byte wordC = word[wordInd];
+//                    if(wordC != seqC) {
+//                        equalUpToS = false;
+//                        break;
+//                    }
+//                    ++wordInd;
+//                }
+//                if(equalUpToS) {
+//                    if(word[wordInd] == s) {
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
 
     private static Dictionary createAlphabet(final byte[] data) {
 
