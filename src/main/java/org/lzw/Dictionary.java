@@ -2,8 +2,6 @@ package org.lzw;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Spliterator;
-import java.util.function.Consumer;
 
 /**
  * Created by lukasz on 03.03.16.
@@ -69,12 +67,19 @@ import java.util.function.Consumer;
 //
 //}
 
-public final class Dictionary implements Iterable<byte[]> {
+public final class Dictionary/* implements Iterable<byte[]> */{
 
+    private static final int INITIAL_INDEX = 256;
+
+    /**
+     * contains only more-than-one-byte words
+     */
     private LinkedList<byte[]> dictionaryInternal = new LinkedList<>();
 
 
     public boolean add(LinkedList<Byte> c, byte s) {
+        /** assuming c is not empty (thats how algorithm works) **/
+
         byte[] newWord = new byte[c.size() + 1];
 
         //  rewrite bytes from c to newWord
@@ -91,13 +96,16 @@ public final class Dictionary implements Iterable<byte[]> {
         return add(newWord);
     }
 
-    public boolean add(byte[] e) {
-        return dictionaryInternal.add(e);
+    public boolean add(byte[] word) {
+        return dictionaryInternal.add(word);
     }
 
     int getIndexOf(LinkedList<Byte> word) {
+        if(word.size() == 1) {
+            return Byte.toUnsignedInt(word.get(0));
+        }
         int dictInd = 0;
-        for(byte[] wordDict : this) {
+        for(byte[] wordDict : dictionaryInternal) {
             if(word.size() == wordDict.length) {
                 boolean equal = true;
 
@@ -113,7 +121,7 @@ public final class Dictionary implements Iterable<byte[]> {
                     ++wordDictInd;
                 }
                 if(equal) {
-                    return dictInd;
+                    return dictInd + INITIAL_INDEX;
                 }
             }
             ++dictInd;
@@ -127,11 +135,18 @@ public final class Dictionary implements Iterable<byte[]> {
         if(index >= size()) {
             return null;
         }
-        return get(index);
+
+        if(index < INITIAL_INDEX) { //  ascii symbol requested
+            return new byte[] {(byte)index};
+        }
+
+        return dictionaryInternal.get(index - INITIAL_INDEX);
     }
 
     public boolean contains(final LinkedList<Byte> c, final byte s) {
-        for(byte[] word : this) {
+        /** assuming c is not empty (thats how algorithm works) **/
+
+        for(byte[] word : dictionaryInternal) {
             if(c.size() + 1 == word.length) {
                 boolean equalUpToS = true;
 
@@ -157,26 +172,22 @@ public final class Dictionary implements Iterable<byte[]> {
     }
 
     public int size() {
-        return dictionaryInternal.size();
+        return dictionaryInternal.size() + INITIAL_INDEX;
     }
 
-    public byte[] get(int index) {
-        return dictionaryInternal.get(index);
-    }
-
-    @Override
-    public Iterator iterator() {
-        return dictionaryInternal.iterator();
-    }
-
-    @Override
-    public void forEach(Consumer action) {
-        dictionaryInternal.forEach(action);
-    }
-
-    @Override
-    public Spliterator spliterator() {
-        return dictionaryInternal.spliterator();
-    }
+//    @Override
+//    public Iterator iterator() {
+//        return dictionaryInternal.iterator();
+//    }
+//
+//    @Override
+//    public void forEach(Consumer action) {
+//        dictionaryInternal.forEach(action);
+//    }
+//
+//    @Override
+//    public Spliterator spliterator() {
+//        return dictionaryInternal.spliterator();
+//    }
 
 }

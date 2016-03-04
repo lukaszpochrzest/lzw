@@ -2,7 +2,7 @@ package org.lzw;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
@@ -15,13 +15,13 @@ public final class LZW {
 
     public static final PrintStream out = System.out;
 
-    public static EncodedData encode(final byte[] data) {
+    public static int[] encode(final byte[] data) {
         if(data == null) {
             return null;
         }
 
         if(data.length == 0) {
-            return new EncodedData();
+            return new int[0];
         }
 
         /** lets start encoding    **/
@@ -29,7 +29,7 @@ public final class LZW {
         LinkedList<Integer> indexes = new LinkedList<>();
 
         //  fill dict with source data alphabet
-        Dictionary dictionary = createAlphabet(data);
+        Dictionary dictionary = createAlphabet();
 
         //  read first symbol
         LinkedList<Byte> c = new LinkedList<>();
@@ -71,16 +71,16 @@ public final class LZW {
             ++ii;
         }
 
-        return new EncodedData(indexesArray, dictionary);
+        return indexesArray;
     }
 
-    public static byte[] decode(EncodedData encodedData) {
+    public static byte[] decode(int[] indexes) {
 
-        if(encodedData == null) {
+        if(indexes == null) {
             return null;
         }
 
-        if(encodedData.indexes.length == 0) {
+        if(indexes.length == 0) {
             return new byte[0];
         }
 
@@ -89,18 +89,18 @@ public final class LZW {
         LinkedList<byte[]> result = new LinkedList<>();
 
         //  fill dict with source data alphabet //  TODO decide whether to use encodedData dict or i.e. ascii table
-        Dictionary dictionary = createAlphabet(encodedData.dictionary);
+        Dictionary dictionary = createAlphabet();
 
         //  pk := first code of compressed data
-        int pk = encodedData.indexes[0] - 1;
+        int pk = indexes[0] - 1;
 
         //  push symbol related to pk to output
         result.add(dictionary.getWord(pk));
 
         int i = 1;
-        while(i < encodedData.indexes.length) { //  while there are still code words to process
+        while(i < indexes.length) { //  while there are still code words to process
             //  read k code
-            int k = encodedData.indexes[i] - 1;
+            int k = indexes[i] - 1;
 
             // pc := dict[pk]
             byte[] pc = dictionary.getWord(pk);
@@ -139,80 +139,8 @@ public final class LZW {
         return toArray(result);
     }
 
-//    private static boolean contains(final Dictionary dictionary,
-//                                    final LinkedList<Byte> c, final byte s) {
-//        for(byte[] word : dictionary) {
-//            if(c.size() + 1 == word.length) {
-//                boolean equalUpToS = true;
-//
-//                Iterator<Byte> sequenceIter = c.iterator();
-//                int wordInd = 0;
-//                while(sequenceIter.hasNext()) {
-//                    Byte seqC = sequenceIter.next();
-//                    byte wordC = word[wordInd];
-//                    if(wordC != seqC) {
-//                        equalUpToS = false;
-//                        break;
-//                    }
-//                    ++wordInd;
-//                }
-//                if(equalUpToS) {
-//                    if(word[wordInd] == s) {
-//                        return true;
-//                    }
-//                }
-//            }
-//        }
-//        return false;
-//    }
-
-    private static Dictionary createAlphabet(final byte[] data) {
-
-        //  alphabet is a simple dictionary - list of 1-element
-        //  arrays of ascii(1byte) symbol, i.e. { ['a'],['b'],['x'] }
-        Dictionary alphabet = new Dictionary();
-
-        for (byte c : data) {
-            //  is c already in our dictionary ?
-
-            boolean alreadyIn = false;
-            for(byte[] word : alphabet) {
-                if(word[0] == c) {
-                    alreadyIn = true;
-                    break;
-                }
-            }
-
-            //  add c to dictionary if its not yet there
-
-            if(!alreadyIn) {
-                alphabet.add( new byte[] { c } );
-            }
-        }
-
-        return alphabet;
-    }
-
-    /**
-     * Thats a bit of a hack. Im creating an initial dictionary for decoding FROM DICTIONARY CREATED DURING ENCODING.
-     * There are different approaches. Either this way or simply use ascii table as initial dictionary for both encoding
-     * or decoding. Gotta decide and/or ask the guy.
-     * @param dictionary
-     * @return
-     */
-    private static Dictionary createAlphabet(Dictionary dictionary) {
-
-        Dictionary result = new Dictionary();
-
-        for(byte[] word: dictionary) {  //  pick up only single letter words, they must be at the beginning
-            if(word.length == 1) {
-                result.add(word);
-            } else {
-                break;  //  single letter words are only at the beginning
-            }
-        }
-
-        return result;
+    private static Dictionary createAlphabet() {
+        return new Dictionary();    //  Dictionary is alphabet-aware now (thats an ascii alphabet)
     }
 
     private static byte[] toArray(LinkedList<byte[]> list) {
@@ -234,6 +162,7 @@ public final class LZW {
 
     public static void main (String[] args) {
 
+
         /** wiki example */
 
         String dataString = WIKI_DATA_EXAMPLE;
@@ -243,18 +172,23 @@ public final class LZW {
         out.println("Encoding: " + dataString);
 
         byte[] data = dataString.getBytes(StandardCharsets.US_ASCII);
-        EncodedData encodedData = LZW.encode(data);
+        int[] indexes = LZW.encode(data);
 
         out.println("Result:" + System.lineSeparator() +
-                "\t" + encodedData.toString() + System.lineSeparator());
+                "\t" + Arrays.toString(indexes) + System.lineSeparator());
 
         /** decoding **/
 
-        out.println("Decoding: " + encodedData.toString());
+        out.println("Decoding: " + Arrays.toString(indexes));
 
-        byte[] decodedData = LZW.decode(encodedData);
+        byte[] decodedData = LZW.decode(indexes);
 
         out.println("Result:" + new String(decodedData, StandardCharsets.US_ASCII) + System.lineSeparator());
+
+//        /** this works! - prints 'a'*/
+//        int i = 97; //  ascii 'a'
+//        byte b = (byte)i;
+//        System.out.println(new String(new byte[] {b}, StandardCharsets.UTF_8));
     }
 
 
