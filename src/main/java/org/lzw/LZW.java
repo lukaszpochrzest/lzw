@@ -1,27 +1,21 @@
 package org.lzw;
 
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.BitSet;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by lukasz on 03.03.16.
  */
 public final class LZW {
 
-    public static final String WIKI_DATA_EXAMPLE = "abccd_abccd_acd_acd_acd_";
-//    public static final String WIKI_DATA_EXAMPLE_ENCODED = "1, 2, 3, 3, 4, 5, 6, 8, 10, 1, 9, 11, 16, 15, 10"
-
-    public static final PrintStream out = System.out;
-
-    public static int[] encode(final byte[] data) {
+    public static EncodedData encode(final byte[] data) {
         if(data == null) {
             return null;
         }
 
         if(data.length == 0) {
-            return new int[0];
+            return null;
         }
 
         /** lets start encoding    **/
@@ -62,27 +56,32 @@ public final class LZW {
         //  int the end, push code(index) of c to output
         indexes.add(dictionary.getIndexOf(c) + 1);
 
-        //  rewrite indexes list to an array
-
-        int[] indexesArray = new int[indexes.size()];
-        int ii = 0;
-        for(int index : indexes) {
-            indexesArray[ii] = index;
-            ++ii;
-        }
-
-        return indexesArray;
+        return indexesToByteArray(indexes);
     }
 
-    public static byte[] decode(int[] indexes) {
+    public static byte[] decode(EncodedData ed) {
 
-        if(indexes == null) {
-            return null;
+        if(ed == null) {
+            throw new IllegalArgumentException("Encoded data can not be null");
         }
 
-        if(indexes.length == 0) {
+        byte[] encodedData = ed.indexesByteArray;
+        int bitsPerInt = ed.bitsPerInt;
+
+        if(encodedData == null) {
+            throw new IllegalArgumentException("Encoded data can not be null");
+        }
+
+        if(encodedData.length == 0) {
             return new byte[0];
         }
+
+        if(bitsPerInt < 0) {
+            throw new IllegalArgumentException("Number of bits per int must be > 0");
+        }
+
+        //  get indexes
+        int[] indexes = intsFromByteArray(encodedData, bitsPerInt);
 
         /** lets start decoding **/
 
@@ -143,6 +142,70 @@ public final class LZW {
         return new Dictionary();    //  Dictionary is alphabet-aware now (thats an ascii alphabet)
     }
 
+    static EncodedData indexesToByteArray(final List<Integer> indexes) {
+        assert(indexes.size() > 0); //  TODO remove assert
+
+        //  find out greatest index value
+        Integer maxIndex = Integer.MIN_VALUE;
+        for(Integer index : indexes) {
+            if (index > maxIndex) {
+                maxIndex = index;
+            }
+        }
+
+        //  find out number bits we have to use to write indexes in optimal way
+        int bitsPerInt = 0;
+        while (maxIndex > 0) {
+            bitsPerInt++;
+            maxIndex = maxIndex >> 1;
+        }
+
+        assert(bitsPerInt > 0); //  TODO remove assert
+
+        //  lets write ints to bytearray in optimal way
+        BitSet bitSet = new BitSet(indexes.size() * bitsPerInt);
+
+        int bitSetInd = 0;
+        boolean[] tempBits = new boolean[bitsPerInt];
+        for(Integer index : indexes) {
+            for (int i = bitsPerInt - 1; i >= 0; --i) {
+                boolean bit = (index & (1 << i)) != 0;  //  TODO check if it works in both LittleEndian and BigEndian?
+                tempBits[i] = bit;
+            }
+            for(int k = 0; k < tempBits.length; ++k) {
+                bitSet.set(bitSetInd + k, tempBits[k]);
+            }
+            bitSetInd += tempBits.length;
+        }
+
+        return new EncodedData(bitsPerInt, bitSet.toByteArray());
+    }
+
+    static int[] intsFromByteArray(final byte[] indexesByteArray, final int bitsPerInt) {
+//        if( (indexesByteArray.length * 8) % bitsPerInt != 0) {
+//            throw new Exception("Its not possible to parse " + indexesByteArray.length + " byte array" +
+//                    " into list of " + bitsPerInt + " bit encoded numbers(indexes)");
+//        }
+
+        int[] resultInts = new int[ (indexesByteArray.length * 8) / bitsPerInt];
+
+        BitSet bitSet = BitSet.valueOf(indexesByteArray);
+        int bitSetInd = 0;
+        int resultIntsInd = 0;
+        while(resultIntsInd < resultInts.length) {
+
+            int newInt = 0;
+            for(int newIntInd = 0; newIntInd < bitsPerInt; ++newIntInd) {
+                newInt += bitSet.get(newIntInd + bitSetInd) ? (1 << newIntInd) : 0; //  TODO check if it works in both LittleEndian and BigEndian?
+            }
+            resultInts[resultIntsInd++] = newInt;
+
+            bitSetInd += bitsPerInt;
+        }
+
+        return resultInts;
+    }
+
     private static byte[] toArray(LinkedList<byte[]> list) {
 
         int lengthSum = 0;
@@ -162,33 +225,6 @@ public final class LZW {
 
     public static void main (String[] args) {
 
-
-        /** wiki example */
-
-        String dataString = WIKI_DATA_EXAMPLE;
-
-        /** encoding **/
-
-        out.println("Encoding: " + dataString);
-
-        byte[] data = dataString.getBytes(StandardCharsets.UTF_8);
-        int[] indexes = LZW.encode(data);
-
-        out.println("Result:" + System.lineSeparator() +
-                "\t" + Arrays.toString(indexes) + System.lineSeparator());
-
-        /** decoding **/
-
-        out.println("Decoding: " + Arrays.toString(indexes));
-
-        byte[] decodedData = LZW.decode(indexes);
-
-        out.println("Result:" + new String(decodedData, StandardCharsets.UTF_8) + System.lineSeparator());
-
-//        /** this works! - prints 'a'*/
-//        int i = 97; //  ascii 'a'
-//        byte b = (byte)i;
-//        System.out.println(new String(new byte[] {b}, StandardCharsets.UTF_8));
     }
 
 
