@@ -10,9 +10,9 @@ import java.util.LinkedList;
 /**
  * Dictionary in terms of LZW algorithm
  */
-public final class Dictionary {
+public class Dictionary {
 
-    private static final int INITIAL_INDEX = 256;
+    protected static final int INITIAL_INDEX = 256;
 
     /**
      * contains only more-than-one-byte words

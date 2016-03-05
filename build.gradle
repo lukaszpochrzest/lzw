@@ -15,7 +15,7 @@ jar {
     baseName = "lzw"
     version =  "1.0.0"
     manifest {
-        attributes 'Main-Class': 'org.lzw.LZW'
+        attributes 'Main-Class': 'org.lzw.Console'
     }
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }

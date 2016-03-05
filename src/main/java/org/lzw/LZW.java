@@ -1,5 +1,6 @@
 package org.lzw;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,13 +10,13 @@ import java.util.List;
  */
 public final class LZW {
 
-    public static EncodedData encode(final byte[] data) {
+    public static byte[] encode(final byte[] data) {
         if(data == null) {
-            return null;
+            throw new IllegalArgumentException("Data to encode can not be null");
         }
 
         if(data.length == 0) {
-            return null;
+            throw new IllegalArgumentException("Data to encode can not be empty");
         }
 
         /** lets start encoding    **/
@@ -59,14 +60,7 @@ public final class LZW {
         return indexesToByteArray(indexes);
     }
 
-    public static byte[] decode(EncodedData ed) {
-
-        if(ed == null) {
-            throw new IllegalArgumentException("Encoded data can not be null");
-        }
-
-        byte[] encodedData = ed.indexesByteArray;
-        int bitsPerInt = ed.bitsPerInt;
+    public static byte[] decode(byte[] encodedData) {
 
         if(encodedData == null) {
             throw new IllegalArgumentException("Encoded data can not be null");
@@ -76,12 +70,8 @@ public final class LZW {
             return new byte[0];
         }
 
-        if(bitsPerInt < 0) {
-            throw new IllegalArgumentException("Number of bits per int must be > 0");
-        }
-
         //  get indexes
-        int[] indexes = intsFromByteArray(encodedData, bitsPerInt);
+        int[] indexes = getIndexes(encodedData);
 
         /** lets start decoding **/
 
@@ -142,7 +132,7 @@ public final class LZW {
         return new Dictionary();    //  Dictionary is alphabet-aware now (thats an ascii alphabet)
     }
 
-    static EncodedData indexesToByteArray(final List<Integer> indexes) {
+    static byte[] indexesToByteArray(final List<Integer> indexes) {
         assert(indexes.size() > 0); //  TODO remove assert
 
         //  find out greatest index value
@@ -162,6 +152,8 @@ public final class LZW {
 
         assert(bitsPerInt > 0); //  TODO remove assert
 
+        System.out.println("Encoding " + indexes.size() + " indexes with " + bitsPerInt + " bits per index");
+
         //  lets write ints to bytearray in optimal way
         BitSet bitSet = new BitSet(indexes.size() * bitsPerInt);
 
@@ -178,14 +170,24 @@ public final class LZW {
             bitSetInd += tempBits.length;
         }
 
-        return new EncodedData(bitsPerInt, bitSet.toByteArray());
+        byte[] encodedByteArray = bitSet.toByteArray();
+        byte[] result = new byte[encodedByteArray.length + 1];  //TODO do it more effectively
+        result[0] = (byte)bitsPerInt;
+        System.arraycopy(encodedByteArray, 0, result, 1, encodedByteArray.length);
+        return result;
+    }
+
+    static int[] getIndexes(final byte[] data) {
+        assert(data.length >= 2);   //  TODO remove assert
+        int bitsPerInt = data[0];
+        if(bitsPerInt < 0) {
+            throw new IllegalArgumentException("Number of bits per int must be > 0");
+        }
+        byte[] intsByteArray = Arrays.copyOfRange(data, 1, data.length);    //  TODO find more efficient way
+        return intsFromByteArray(intsByteArray, bitsPerInt);
     }
 
     static int[] intsFromByteArray(final byte[] indexesByteArray, final int bitsPerInt) {
-//        if( (indexesByteArray.length * 8) % bitsPerInt != 0) {
-//            throw new Exception("Its not possible to parse " + indexesByteArray.length + " byte array" +
-//                    " into list of " + bitsPerInt + " bit encoded numbers(indexes)");
-//        }
 
         int[] resultInts = new int[ (indexesByteArray.length * 8) / bitsPerInt];
 
@@ -221,12 +223,5 @@ public final class LZW {
         }
         return result;
     }
-
-
-    public static void main (String[] args) {
-
-    }
-
-
 
 }
