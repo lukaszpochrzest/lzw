@@ -1,9 +1,6 @@
 package org.lzw;
 
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by lukasz on 03.03.16.
@@ -75,7 +72,7 @@ public final class LZW {
 
         /** lets start decoding **/
 
-        LinkedList<byte[]> result = new LinkedList<>();
+        LinkedList<List<Byte>> result = new LinkedList<>();
 
         //  fill dict with source data alphabet //  TODO decide whether to use encodedData dict or i.e. ascii table
         DecodingDictionary decodingDictionary = createDecodingDictionary();
@@ -92,27 +89,27 @@ public final class LZW {
             int k = indexes[i] - 1;
 
             // pc := dict[pk]
-            byte[] pc = decodingDictionary.getWord(pk);
+            List<Byte> pc = decodingDictionary.getWord(pk);
             assert(pc != null);
 
             //  kword
-            byte[] kword = decodingDictionary.getWord(k);
+            List<Byte> kword = decodingDictionary.getWord(k);
             if(kword != null) { // kword is in dict
 
                 //  add {pc + kword[0]} word to dict
+                List<Byte> temp = new LinkedList<>(pc);
+                temp.add(kword.get(0));
 
-                byte[] temp = new byte[pc.length + 1];
-                System.arraycopy(pc, 0, temp, 0, pc.length);
-                temp[temp.length - 1] = kword[0];
                 decodingDictionary.add(temp);
 
                 //  push kword to output
                 result.add(kword);
             } else {
                 //  add {pc + pc[0]} word to dict
-                byte[] temp = new byte[pc.length + 1];
-                System.arraycopy(pc, 0, temp, 0, pc.length);
-                temp[temp.length - 1] = pc[0];
+
+                List<Byte> temp = new LinkedList<>(pc);
+                temp.add(pc.get(0));
+
                 decodingDictionary.add(temp);
 
                 //  push {pc + pc[0]} to output
@@ -213,18 +210,25 @@ public final class LZW {
         return resultInts;
     }
 
-    private static byte[] toArray(LinkedList<byte[]> list) {
+    private static byte[] toArray(List<List<Byte>> list) {
 
         int lengthSum = 0;
-        for(byte[] element : list) {
-            lengthSum += element.length;
+        for(List element : list) {
+            lengthSum += element.size();
         }
 
         byte[] result = new byte[lengthSum];
+
         int i = 0;
-        for(byte[] element : list) {
-            System.arraycopy(element, 0, result, i, element.length);
-            i += element.length;
+        for(List<Byte> element : list) {
+//            System.arraycopy(element, 0, result, i, element.length);
+//            i += element.length;
+            int k = 0;
+            for(Byte b : element) {
+                result[i+k] = b;
+                ++k;
+            }
+            i += element.size();
         }
         return result;
     }
