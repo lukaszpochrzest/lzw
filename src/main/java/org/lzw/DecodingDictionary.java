@@ -10,7 +10,7 @@ import java.util.LinkedList;
 /**
  * Dictionary in terms of LZW algorithm
  */
-public class Dictionary {
+public final class DecodingDictionary {
 
     protected static final int INITIAL_INDEX = 256;
 

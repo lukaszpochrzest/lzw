@@ -24,7 +24,7 @@ public final class LZW {
         LinkedList<Integer> indexes = new LinkedList<>();
 
         //  fill dict with source data alphabet
-        Dictionary dictionary = createAlphabet();
+        EncodingDictionary dictionary = createEncodingDictionary();
 
         //  read first symbol
         LinkedList<Byte> c = new LinkedList<>();
@@ -78,13 +78,13 @@ public final class LZW {
         LinkedList<byte[]> result = new LinkedList<>();
 
         //  fill dict with source data alphabet //  TODO decide whether to use encodedData dict or i.e. ascii table
-        Dictionary dictionary = createAlphabet();
+        DecodingDictionary decodingDictionary = createDecodingDictionary();
 
         //  pk := first code of compressed data
         int pk = indexes[0] - 1;
 
         //  push symbol related to pk to output
-        result.add(dictionary.getWord(pk));
+        result.add(decodingDictionary.getWord(pk));
 
         int i = 1;
         while(i < indexes.length) { //  while there are still code words to process
@@ -92,11 +92,11 @@ public final class LZW {
             int k = indexes[i] - 1;
 
             // pc := dict[pk]
-            byte[] pc = dictionary.getWord(pk);
+            byte[] pc = decodingDictionary.getWord(pk);
             assert(pc != null);
 
             //  kword
-            byte[] kword = dictionary.getWord(k);
+            byte[] kword = decodingDictionary.getWord(k);
             if(kword != null) { // kword is in dict
 
                 //  add {pc + kword[0]} word to dict
@@ -104,7 +104,7 @@ public final class LZW {
                 byte[] temp = new byte[pc.length + 1];
                 System.arraycopy(pc, 0, temp, 0, pc.length);
                 temp[temp.length - 1] = kword[0];
-                dictionary.add(temp);
+                decodingDictionary.add(temp);
 
                 //  push kword to output
                 result.add(kword);
@@ -113,7 +113,7 @@ public final class LZW {
                 byte[] temp = new byte[pc.length + 1];
                 System.arraycopy(pc, 0, temp, 0, pc.length);
                 temp[temp.length - 1] = pc[0];
-                dictionary.add(temp);
+                decodingDictionary.add(temp);
 
                 //  push {pc + pc[0]} to output
                 result.add(temp);
@@ -128,8 +128,13 @@ public final class LZW {
         return toArray(result);
     }
 
-    private static Dictionary createAlphabet() {
-        return new Dictionary();    //  Dictionary is alphabet-aware now (thats an ascii alphabet)
+
+    private static EncodingDictionary createEncodingDictionary() {
+        return new EncodingDictionary();
+    }
+
+    private static DecodingDictionary createDecodingDictionary() {
+        return new DecodingDictionary();    //  Dictionary is alphabet-aware now (thats an ascii alphabet)
     }
 
     static byte[] indexesToByteArray(final List<Integer> indexes) {
