@@ -36,8 +36,13 @@ public class ProgramParams {
                 VERBOSE + "\t" + "verbose" + System.lineSeparator();
     }
 
-    public ProgramParams(String[] args) {
+    private static ProgramParams pp;
 
+    public static void parse(String[] args) {
+        pp = new ProgramParams(args);
+    }
+
+    private ProgramParams(String[] args) {
         List<String> argList = Arrays.asList(args);
         help(argList);
         input(argList);
@@ -45,7 +50,6 @@ public class ProgramParams {
         encode(argList);
         decode(argList);
         verbose(argList);
-
     }
 
     /**
@@ -97,27 +101,27 @@ public class ProgramParams {
         verbose = argList.indexOf(VERBOSE) != -1;
     }
 
-    public String getInputFileName() {
-        return inputFileName;
+    public static String getInputFileName() {
+        return pp != null ? pp.inputFileName : null;
     }
 
-    public String getOutputFileName() {
-        return outputFileName;
+    public static String getOutputFileName() {
+        return pp != null ? pp.outputFileName : null;
     }
 
-    public boolean isEncode() {
-        return encode;
+    public static boolean isEncode() {
+        return pp != null ? pp.encode : false;
     }
 
-    public boolean isDecode() {
-        return decode;
+    public static boolean isDecode() {
+        return pp != null ? pp.decode : false;
     }
 
-    public boolean isHelp() {
-        return help;
+    public static boolean isHelp() {
+        return pp != null ? pp.help : false;
     }
 
-    public boolean isVerbose() {
-        return verbose;
+    public static boolean isVerbose() {
+        return pp != null ? pp.verbose : false;
     }
 }

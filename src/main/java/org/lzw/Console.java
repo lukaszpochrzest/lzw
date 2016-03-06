@@ -1,5 +1,7 @@
 package org.lzw;
 
+import static org.lzw.ProgramParams.*;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,27 +14,27 @@ import java.nio.file.Paths;
 public class Console {
 
     public static void main (String[] args) {
-        ProgramParams pp = new ProgramParams(args);
+        parse(args);
 
         //  help
 
-        if(pp.isHelp()) {
-            System.out.println(ProgramParams.paramsDescription());
+        if(isHelp()) {
+            System.out.println(paramsDescription());
             return;
         }
 
         //  output file
 
-        String outputFileName = pp.getOutputFileName();
+        String outputFileName = getOutputFileName();
 
         if(outputFileName == null) {
             System.out.println("Output file needs to be defined");
-            return;
+            System.exit(1);
         }
 
         //  input file
 
-        String inputFileName = pp.getInputFileName();
+        String inputFileName = getInputFileName();
         byte[] inputData = null;
 
         try {
@@ -41,13 +43,13 @@ public class Console {
             }
         } catch (IOException e) {
             System.out.println("Error reading file: " + inputFileName);
-            return;
+            System.exit(1);
         }
 
         //  encode/decode
 
-        boolean isEncode = pp.isEncode();
-        boolean isDecode = pp.isDecode();
+        boolean isEncode = isEncode();
+        boolean isDecode = isDecode();
 
         byte[] dataToWriteToFile = null;
 
@@ -58,15 +60,20 @@ public class Console {
             dataToWriteToFile = LZW.encode(inputData);
         } else if(isDecode && !isEncode) {  //  decode
             //  decode data
-            dataToWriteToFile = LZW.decode(inputData);
+            try{
+                dataToWriteToFile = LZW.decode(inputData);
+            } catch(Exception e) {
+                System.out.println("Invalid input file (is this file a compressed one?)");
+                System.exit(1);
+            }
         } else {
             System.out.println("Choose between encoding and decoding...");
-            return;
+            System.exit(1);
         }
 
         long elapsedMs = System.currentTimeMillis() - startTimeMs;
 
-        if(pp.isVerbose()) {
+        if(isVerbose()) {
             System.out.println("Operation lasted " + (float)elapsedMs / 1000 + "s");
         }
 
@@ -77,9 +84,11 @@ public class Console {
                 write(outputFileName, dataToWriteToFile);
             } catch (IOException e) {
                 System.out.println("Error writing to a file: " + outputFileName);
+                System.exit(1);
             }
         } else {
-            System.out.println("No data for write");
+            System.out.println("No data to write");
+            System.exit(1);
         }
 
     }

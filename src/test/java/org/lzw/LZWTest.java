@@ -30,13 +30,13 @@ public class LZWTest {
         }
 
         /** encode indexes  **/
-        byte[] encodedData = LZW.indexesToByteArray(intList);
+        byte[] encodedData = LZWUtility.indexesToByteArray(intList);
 
         /** decode indexes  **/
         int bitsPerInt = encodedData[0];
         byte[] encodedDataWithOutFirstByte = new byte[encodedData.length-1];
         System.arraycopy(encodedData, 1, encodedDataWithOutFirstByte, 0, encodedData.length - 1);
-        int[] decodedInts = LZW.intsFromByteArray(encodedDataWithOutFirstByte, bitsPerInt);
+        int[] decodedInts = LZWUtility.indexesFromPrunedByteArray(encodedDataWithOutFirstByte, bitsPerInt);
 
         Assert.assertTrue(Arrays.equals(intArr, decodedInts));
 
