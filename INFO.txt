@@ -1,0 +1,5 @@
+Jakby był błąd z wczytaniem projektu do Intellij, tj.
+
+Error:Unable to make the module: lzw, related gradle configuration was not found. Please, re-import the Gradle project and try again.
+
+to trzeba kliknac odswież w okienku gradle projects.
