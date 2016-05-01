@@ -2,11 +2,20 @@ package org.lzw;
 
 import static org.lzw.ProgramParams.*;
 
+import ImageGen.GaussianImageGenerator;
+import ImageGen.ImageGenerator;
+import ImageGen.LaplaceImageGenerator;
+import ImageGen.UniformImageGenerator;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import javax.imageio.*;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 
 /**
  * Created by lukasz on 04.03.16.
@@ -50,12 +59,43 @@ public class Console {
 
         boolean isEncode = isEncode();
         boolean isDecode = isDecode();
+        boolean isGenerate = isGenerate();
 
         byte[] dataToWriteToFile = null;
 
         long startTimeMs = System.currentTimeMillis();
 
-        if(isEncode && !isDecode) { //  encode
+        if( isGenerate )
+        {
+            try
+            {
+                ImageGenerator generator = null;
+                if( getDistribution() == ImageDistribution.Uniform )
+                    generator = new UniformImageGenerator();
+                else if( getDistribution() == ImageDistribution.Gauss )
+                    generator = new GaussianImageGenerator();
+                else if( getDistribution() == ImageDistribution.Laplace )
+                    generator = new LaplaceImageGenerator();
+                else
+                {
+                    System.out.println( "Error: distribution not set" );
+                    System.exit(1);
+                }
+
+                BufferedImage image = generator.GenerateImage( 500, 500 );
+                File outputfile = new File( outputFileName );
+                ImageIO.write(image, "bmp", outputfile);
+
+                System.out.println( "Writing image to a file: " + System.getProperty("user.dir") + "/" + outputFileName);
+                System.exit(1);
+            }
+            catch ( IOException e )
+            {
+                System.out.println( e.getMessage() );
+                System.exit(1);
+            }
+        }
+        else if(isEncode && !isDecode) { //  encode
             //  encode data
             dataToWriteToFile = LZW.encode(inputData);
         } else if(isDecode && !isEncode) {  //  decode
@@ -67,7 +107,7 @@ public class Console {
                 System.exit(1);
             }
         } else {
-            System.out.println("Choose between encoding and decoding...");
+            System.out.println("Choose between encoding, decoding or generating...");
             System.exit(1);
         }
 

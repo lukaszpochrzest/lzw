@@ -9,6 +9,15 @@ import java.util.List;
 public class ProgramParams {
 
 
+    enum ImageDistribution
+    {
+        Uniform,
+        Gauss,
+        Laplace,
+
+        Unknown
+    }
+
     private static final String HELP = "-h";
     private boolean help = false;
 
@@ -23,6 +32,12 @@ public class ProgramParams {
 
     private static final String DECODE = "decode";
     private boolean decode = false;
+
+    private static final String GENERATE = "generate";
+    private boolean genImg = false;
+
+    private static final String DISTRIBUTION = "-distribution";
+    private ImageDistribution imgDistribution = ImageDistribution.Unknown;
 
     private static final String VERBOSE = "-v";
     private boolean verbose = false;
@@ -50,6 +65,8 @@ public class ProgramParams {
         encode(argList);
         decode(argList);
         verbose(argList);
+        generate(argList);
+        distribution(argList);
     }
 
     /**
@@ -67,6 +84,28 @@ public class ProgramParams {
         if(index != -1) {
             if(index + 1 < argList.size()) {
                 inputFileName = argList.get(index + 1);
+            }
+        }
+    }
+
+    /**
+     * Parsing -distribution option
+     */
+    private void distribution(List<String> argList) {
+        int index = argList.indexOf(DISTRIBUTION);
+        if(index != -1) {
+            if(index + 1 < argList.size()) {
+                String distributionStr = argList.get(index + 1);
+                distributionStr = distributionStr.toLowerCase();
+
+                if( distributionStr.equals( "uniform" ) )
+                    imgDistribution = ImageDistribution.Uniform;
+                else if( distributionStr.equals( "gauss" ) )
+                    imgDistribution = ImageDistribution.Gauss;
+                else if( distributionStr.equals( "laplace" ) )
+                    imgDistribution = ImageDistribution.Laplace;
+                else
+                    imgDistribution = ImageDistribution.Unknown;
             }
         }
     }
@@ -96,6 +135,12 @@ public class ProgramParams {
     private void decode(List<String> argList) {
         decode = argList.indexOf(DECODE) != -1;
     }
+    /**
+     * Parsing generate option
+     */
+    private void generate(List<String> argList) {
+        genImg = argList.indexOf(GENERATE) != -1;
+    }
 
     private void verbose(List<String> argList) {
         verbose = argList.indexOf(VERBOSE) != -1;
@@ -117,11 +162,19 @@ public class ProgramParams {
         return pp != null ? pp.decode : false;
     }
 
+    public static boolean isGenerate() {
+        return pp != null ? pp.genImg : false;
+    }
+
     public static boolean isHelp() {
         return pp != null ? pp.help : false;
     }
 
     public static boolean isVerbose() {
         return pp != null ? pp.verbose : false;
+    }
+
+    public static ImageDistribution getDistribution() {
+        return pp != null ? pp.imgDistribution : ImageDistribution.Unknown;
     }
 }
