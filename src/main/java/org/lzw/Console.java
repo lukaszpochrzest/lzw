@@ -74,8 +74,24 @@ public class Console {
                     generator = new UniformImageGenerator();
                 else if( getDistribution() == ImageDistribution.Gauss )
                     generator = new GaussianImageGenerator();
-                else if( getDistribution() == ImageDistribution.Laplace )
-                    generator = new LaplaceImageGenerator();
+                else if( getDistribution() == ImageDistribution.Laplace ) {
+                    double paramMu = 0.0;
+                    double paramBeta = 0.0;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+                    System.out.print("Enter value of mu:");
+                    try {
+                        paramMu = Double.parseDouble(br.readLine());
+                    } catch (NumberFormatException nfe) {
+                        System.err.println("Invalid Format!");
+                    }
+                    System.out.print("Enter value of beta and it must be positive:");
+                    try {
+                        paramBeta = Double.parseDouble(br.readLine());
+                    } catch (NumberFormatException nfe) {
+                        System.err.println("Invalid Format!");
+                    }
+                    generator = new LaplaceImageGenerator(paramMu, paramBeta);
+                    }
                 else
                 {
                     System.out.println( "Error: distribution not set" );
