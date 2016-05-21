@@ -10,6 +10,9 @@ import java.util.*;
  */
 public final class LZW {
 
+    //for test purposes
+    static LinkedList<Integer> indexes;
+
     public static byte[] encode(final byte[] data) {
         if(data == null) {
             throw new IllegalArgumentException("Data to encode can not be null");
@@ -21,7 +24,7 @@ public final class LZW {
 
         /** lets start encoding    **/
 
-        LinkedList<Integer> indexes = new LinkedList<>();
+        indexes = new LinkedList<>();
 
         //  fill dict with source data alphabet
         EncodingDictionary dictionary = new EncodingDictionary();
@@ -42,7 +45,7 @@ public final class LZW {
                 c.add(s);
             } else {
                 //  push code(index) of c to output
-                indexes.add(dictionary.getIndexOf(c) + 1);
+                indexes.add(dictionary.getIndexOf(c));
 
                 //  add c + s to dictionary
                 dictionary.add(c, s);
@@ -55,7 +58,7 @@ public final class LZW {
         }
 
         //  int the end, push code(index) of c to output
-        indexes.add(dictionary.getIndexOf(c) + 1);
+        indexes.add(dictionary.getIndexOf(c));
 
         byte[] resultByteArray = indexesToByteArray(indexes);
 
@@ -86,7 +89,7 @@ public final class LZW {
         DecodingDictionary decodingDictionary = new DecodingDictionary();
 
         //  pk := first code of compressed data
-        int pk = indexes[0] - 1;
+        int pk = indexes[0];
 
         //  push symbol related to pk to output
         result.add(decodingDictionary.getWord(pk));
@@ -94,7 +97,7 @@ public final class LZW {
         int i = 1;
         while(i < indexes.length) { //  while there are still code words to process
             //  read k code
-            int k = indexes[i] - 1;
+            int k = indexes[i];
 
             // pc := dict[pk]
             List<Byte> pc = decodingDictionary.getWord(pk);
