@@ -42,13 +42,17 @@ public class ProgramParams {
     private static final String VERBOSE = "-v";
     private boolean verbose = false;
 
+    private static final String TEST_LOG = "-testlog";
+    private boolean testLog = false;
+
 
     public static String paramsDescription() {
         return  INPUT + "\t" + "input file" + System.lineSeparator() +
                 OUTPUT + "\t" + "output file" + System.lineSeparator() +
                 ENCODE + "\t" + "encode" + System.lineSeparator() +
                 DECODE + "\t" + "decode" + System.lineSeparator() +
-                VERBOSE + "\t" + "verbose" + System.lineSeparator();
+                VERBOSE + "\t" + "verbose" + System.lineSeparator() +
+                TEST_LOG + "\t" + "test log" + System.lineSeparator();
     }
 
     private static ProgramParams pp;
@@ -65,6 +69,7 @@ public class ProgramParams {
         encode(argList);
         decode(argList);
         verbose(argList);
+        testLog(argList);
         generate(argList);
         distribution(argList);
     }
@@ -146,6 +151,10 @@ public class ProgramParams {
         verbose = argList.indexOf(VERBOSE) != -1;
     }
 
+    private void testLog(List<String> argList) {
+        testLog = argList.indexOf(TEST_LOG) != -1;
+    }
+
     public static String getInputFileName() {
         return pp != null ? pp.inputFileName : null;
     }
@@ -172,6 +181,10 @@ public class ProgramParams {
 
     public static boolean isVerbose() {
         return pp != null ? pp.verbose : false;
+    }
+
+    public static boolean isTestLog() {
+        return pp!= null ? pp.testLog : false;
     }
 
     public static ImageDistribution getDistribution() {

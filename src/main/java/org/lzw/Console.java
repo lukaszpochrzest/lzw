@@ -1,5 +1,7 @@
 package org.lzw;
 
+import static org.lzw.Logger.log;
+import static org.lzw.Logger.testLog;
 import static org.lzw.ProgramParams.*;
 
 import ImageGen.GaussianImageGenerator;
@@ -99,6 +101,10 @@ public class Console {
         else if(isEncode && !isDecode) { //  encode
             //  encode data
             dataToWriteToFile = LZW.encode(inputData);
+            testLog(inputFileName + " | " +
+                    (dataToWriteToFile.length < inputData.length ?
+                    "-" + (1 - ((float) dataToWriteToFile.length / inputData.length)) * 100 + "%" :
+                    "+" + ((float) (dataToWriteToFile.length - inputData.length) / inputData.length) * 100 + "%"));
         } else if(isDecode && !isEncode) {  //  decode
             //  decode data
             try{
@@ -114,9 +120,7 @@ public class Console {
 
         long elapsedMs = System.currentTimeMillis() - startTimeMs;
 
-        if(isVerbose()) {
-            System.out.println("Operation lasted " + (float)elapsedMs / 1000 + "s");
-        }
+        log("Operation lasted " + (float) elapsedMs / 1000 + "s");
 
         //  write to file
 
@@ -141,6 +145,7 @@ public class Console {
     }
 
     public static byte[] read(String fileName) throws IOException {
+        log("Reading " + fileName + "...");
         Path path = Paths.get(fileName);
         return Files.readAllBytes(path);
     }

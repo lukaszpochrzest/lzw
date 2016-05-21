@@ -1,9 +1,10 @@
 package org.lzw;
 
-import static org.lzw.Logger.log;
-import static org.lzw.LZWUtility.*;
+import java.util.LinkedList;
+import java.util.List;
 
-import java.util.*;
+import static org.lzw.LZWUtility.*;
+import static org.lzw.Logger.log;
 
 /**
  * Created by lukasz on 03.03.16.
@@ -63,7 +64,9 @@ public final class LZW {
         byte[] resultByteArray = indexesToByteArray(indexes);
 
         log("Compressed " + data.length + " bytes to " + resultByteArray.length + " bytes" +
-                (resultByteArray.length < data.length ? ", space saving " + (1 - ((float) resultByteArray.length/data.length))*100 + "%" : ""));
+                (resultByteArray.length < data.length ?
+                        ", space saving " + (1 - ((float) resultByteArray.length / data.length)) * 100 + "%" :
+                        ", space wasted " + ((float) (resultByteArray.length - data.length) / data.length) * 100 + "%"));
 
         return resultByteArray;
     }
