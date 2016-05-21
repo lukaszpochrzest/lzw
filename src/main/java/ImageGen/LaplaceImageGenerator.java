@@ -1,36 +1,41 @@
 package ImageGen;
 
-import java.awt.image.BufferedImage;
-import java.lang.Math;
+import static java.lang.Math.abs;
+import static java.lang.Math.log;
+import static java.lang.Math.signum;
+
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Witek on 2016-05-01.
  */
-
-
 public class LaplaceImageGenerator extends ImageGenerator
 {
-    double mu;
-    double beta;
+    private static final double DEFAULT_MU = 128.0d;
+    private static final double DEFAULT_BETA = 20.0d;
+
+    private double mu;
+    private double beta;
+
+    public LaplaceImageGenerator() {
+        mu = DEFAULT_MU;
+        beta = DEFAULT_BETA;
+    }
 
     public LaplaceImageGenerator(double paramMu, double paramBeta) {
         this.mu = paramMu;
         this.beta = paramBeta;
     }
 
+    /**
+     * way to generate random variable according to Laplace distribution
+     *
+     * https://en.wikipedia.org/wiki/Laplace_distribution#Generating_random_variables_according_to_the_Laplace_distribution
+     */
     @Override
     int GetNextSample( int x, int y ) {
-        double randValue = ThreadLocalRandom.current().nextDouble(0, 256);
-
-        if( beta < 0 ){
-            System.err.println("Invalid value of Beta! Should be positive therefore generated imaged is invalid.");
-        }
-
-        if( x <= mu ) {
-            return (int)(Math.exp((randValue - mu) / beta ) / 2.0);
-        } else {
-            return (int)(1.0 - Math.exp((randValue - mu) / beta ) / 2.0);
-        }
+        float randValue = ThreadLocalRandom.current().nextFloat() - 0.5f;
+        int xx = (int)(mu - beta * signum(randValue) * log(1 - 2 * abs(randValue)));
+        return xx;
     }
 }
