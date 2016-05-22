@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class LaplaceImageGenerator extends ImageGenerator
 {
     private static final double DEFAULT_MU = 128.0d;
-    private static final double DEFAULT_BETA = 20.0d;
+    private static final double DEFAULT_BETA = 10.0d;
 
     private double mu;
     private double beta;

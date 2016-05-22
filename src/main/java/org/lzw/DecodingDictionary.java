@@ -13,7 +13,7 @@ import java.util.List;
  */
 public final class DecodingDictionary {
 
-    private static final int INITIAL_DICTIONARY_INTERNAL_SIZE = 1000;
+    private static final int INITIAL_DICTIONARY_INTERNAL_SIZE = 1 << 12;    //aka 4096
 
     protected static final int INITIAL_INDEX = 256;
 

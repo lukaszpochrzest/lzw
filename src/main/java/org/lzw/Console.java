@@ -101,10 +101,7 @@ public class Console {
         else if(isEncode && !isDecode) { //  encode
             //  encode data
             dataToWriteToFile = LZW.encode(inputData);
-            testLog(inputFileName + " | " +
-                    (dataToWriteToFile.length < inputData.length ?
-                    "-" + (1 - ((float) dataToWriteToFile.length / inputData.length)) * 100 + "%" :
-                    "+" + ((float) (dataToWriteToFile.length - inputData.length) / inputData.length) * 100 + "%"));
+            testLog(inputFileName + " | " + (1 - ((float) dataToWriteToFile.length / inputData.length)) * 100 + "%");
         } else if(isDecode && !isEncode) {  //  decode
             //  decode data
             try{
