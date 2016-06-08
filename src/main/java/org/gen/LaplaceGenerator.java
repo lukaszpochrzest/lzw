@@ -1,4 +1,4 @@
-package ImageGen;
+package org.gen;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.log;
@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Created by Witek on 2016-05-01.
  */
-public class LaplaceImageGenerator extends ImageGenerator
+public class LaplaceGenerator extends Generator
 {
     private static final double DEFAULT_MU = 128.0d;
     private static final double DEFAULT_BETA = 10.0d;
@@ -17,12 +17,12 @@ public class LaplaceImageGenerator extends ImageGenerator
     private double mu;
     private double beta;
 
-    public LaplaceImageGenerator() {
+    public LaplaceGenerator() {
         mu = DEFAULT_MU;
         beta = DEFAULT_BETA;
     }
 
-    public LaplaceImageGenerator(double paramMu, double paramBeta) {
+    public LaplaceGenerator(double paramMu, double paramBeta) {
         this.mu = paramMu;
         this.beta = paramBeta;
     }

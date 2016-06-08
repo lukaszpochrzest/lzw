@@ -9,7 +9,7 @@ import java.util.List;
 public class ProgramParams {
 
 
-    enum ImageDistribution
+    enum Distribution
     {
         Uniform,
         Gauss,
@@ -37,7 +37,7 @@ public class ProgramParams {
     private boolean genImg = false;
 
     private static final String DISTRIBUTION = "-distribution";
-    private ImageDistribution imgDistribution = ImageDistribution.Unknown;
+    private Distribution imgDistribution = Distribution.Unknown;
 
     private static final String VERBOSE = "-v";
     private boolean verbose = false;
@@ -104,13 +104,13 @@ public class ProgramParams {
                 distributionStr = distributionStr.toLowerCase();
 
                 if( distributionStr.equals( "uniform" ) )
-                    imgDistribution = ImageDistribution.Uniform;
+                    imgDistribution = Distribution.Uniform;
                 else if( distributionStr.equals( "gauss" ) )
-                    imgDistribution = ImageDistribution.Gauss;
+                    imgDistribution = Distribution.Gauss;
                 else if( distributionStr.equals( "laplace" ) )
-                    imgDistribution = ImageDistribution.Laplace;
+                    imgDistribution = Distribution.Laplace;
                 else
-                    imgDistribution = ImageDistribution.Unknown;
+                    imgDistribution = Distribution.Unknown;
             }
         }
     }
@@ -187,7 +187,7 @@ public class ProgramParams {
         return pp!= null ? pp.testLog : false;
     }
 
-    public static ImageDistribution getDistribution() {
-        return pp != null ? pp.imgDistribution : ImageDistribution.Unknown;
+    public static Distribution getDistribution() {
+        return pp != null ? pp.imgDistribution : Distribution.Unknown;
     }
 }

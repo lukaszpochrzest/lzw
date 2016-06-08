@@ -1,7 +1,4 @@
-package ImageGen;
-
-import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
+package org.gen;
 
 /**
  * Created by Witek on 2016-05-01.
@@ -11,7 +8,7 @@ import java.awt.image.Raster;
 import java.util.concurrent.ThreadLocalRandom;
 
 
-public class UniformImageGenerator extends ImageGenerator
+public class UniformGenerator extends Generator
 {
 
     @Override

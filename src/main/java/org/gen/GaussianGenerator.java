@@ -1,6 +1,5 @@
-package ImageGen;
+package org.gen;
 
-import java.awt.image.BufferedImage;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -8,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 
 
-public class GaussianImageGenerator extends ImageGenerator
+public class GaussianGenerator extends Generator
 {
 
     @Override

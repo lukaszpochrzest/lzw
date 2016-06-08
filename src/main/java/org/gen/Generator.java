@@ -1,4 +1,4 @@
-package ImageGen;
+package org.gen;
 
 /**
  * Created by Witek on 2016-05-01.
@@ -6,7 +6,7 @@ package ImageGen;
 import java.awt.image.BufferedImage;
 import java.nio.Buffer;
 
-public abstract class ImageGenerator
+public abstract class Generator
 {
     public BufferedImage GenerateImage( int width, int height )
     {

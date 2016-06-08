@@ -4,10 +4,10 @@ import static org.lzw.Logger.log;
 import static org.lzw.Logger.testLog;
 import static org.lzw.ProgramParams.*;
 
-import ImageGen.GaussianImageGenerator;
-import ImageGen.ImageGenerator;
-import ImageGen.LaplaceImageGenerator;
-import ImageGen.UniformImageGenerator;
+import org.gen.GaussianGenerator;
+import org.gen.Generator;
+import org.gen.LaplaceGenerator;
+import org.gen.UniformGenerator;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import javax.imageio.*;
@@ -71,13 +71,13 @@ public class Console {
         {
             try
             {
-                ImageGenerator generator = null;
-                if( getDistribution() == ImageDistribution.Uniform )
-                    generator = new UniformImageGenerator();
-                else if( getDistribution() == ImageDistribution.Gauss )
-                    generator = new GaussianImageGenerator();
-                else if( getDistribution() == ImageDistribution.Laplace ) {
-                        generator = new LaplaceImageGenerator(/*paramMu, paramBeta*/);
+                Generator generator = null;
+                if( getDistribution() == Distribution.Uniform )
+                    generator = new UniformGenerator();
+                else if( getDistribution() == Distribution.Gauss )
+                    generator = new GaussianGenerator();
+                else if( getDistribution() == Distribution.Laplace ) {
+                        generator = new LaplaceGenerator(/*paramMu, paramBeta*/);
                     }
                 else
                 {
@@ -100,8 +100,11 @@ public class Console {
         }
         else if(isEncode && !isDecode) { //  encode
             //  encode data
+            double inputEntropy = EntropyUtilis.computeEntropy(inputData);
             dataToWriteToFile = LZW.encode(inputData);
             testLog(inputFileName + " | " + (1 - ((float) dataToWriteToFile.length / inputData.length)) * 100 + "%");
+            double avgBitLength = (double)inputData.length * 8 / dataToWriteToFile.length;
+            testLog("Entropy vs avg bit length: " + String.format( "%.2f", inputEntropy )  + " " + String.format( "%.2f", avgBitLength ));
         } else if(isDecode && !isEncode) {  //  decode
             //  decode data
             try{
