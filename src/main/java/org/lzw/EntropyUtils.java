@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Created by lukasz on 08.06.16.
  */
-public class EntropyUtilis {
+public class EntropyUtils {
 
     public static double computeEntropy(byte[] data) {
         if(data == null) {

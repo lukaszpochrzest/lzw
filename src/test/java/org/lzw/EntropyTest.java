@@ -20,6 +20,6 @@ public class EntropyTest {
 
     @Test
     public void entropyTest() {
-        Assert.assertEquals(EntropyUtilis.computeEntropy(data), entropy, 0.0d);
+        Assert.assertEquals(EntropyUtils.computeEntropy(data), entropy, 0.0d);
     }
 }

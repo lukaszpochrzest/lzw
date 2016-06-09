@@ -1,5 +1,7 @@
 package org.lzw;
 
+import org.exception.InvalidParamsException;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -69,10 +71,10 @@ public final class LZW {
         return resultByteArray;
     }
 
-    public static byte[] decode(byte[] encodedData) {
+    public static byte[] decode(byte[] encodedData) throws InvalidParamsException {
 
         if(encodedData == null) {
-            throw new IllegalArgumentException("Encoded data can not be null");
+            throw new InvalidParamsException("Encoded data can not be null");
         }
 
         if(encodedData.length == 0) {

@@ -1,22 +1,19 @@
 package org.lzw;
 
-import static org.lzw.Logger.log;
-import static org.lzw.Logger.testLog;
-import static org.lzw.ProgramParams.*;
-
+import org.exception.InvalidParamsException;
 import org.gen.GaussianGenerator;
 import org.gen.Generator;
 import org.gen.LaplaceGenerator;
 import org.gen.UniformGenerator;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import javax.imageio.*;
 
-import java.io.FileOutputStream;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import static org.lzw.Logger.log;
+import static org.lzw.Logger.testLog;
+import static org.lzw.ProgramParams.*;
 
 
 /**
@@ -27,127 +24,187 @@ public class Console {
     public static void main (String[] args) {
         parse(args);
 
-        //  help
+        //  help ?
 
         if(isHelp()) {
             System.out.println(paramsDescription());
-            return;
+            System.exit(0);
         }
-
-        //  output file
-
-        String outputFileName = getOutputFileName();
-
-        if(outputFileName == null) {
-            System.out.println("Output file needs to be defined");
-            System.exit(1);
-        }
-
-        //  input file
-
-        String inputFileName = getInputFileName();
-        byte[] inputData = null;
 
         try {
-            if(inputFileName != null) {
-                inputData = read(inputFileName);
+            //  encode/decode/generate ?
+
+            boolean isEncode = isEncode();
+            boolean isDecode = isDecode();
+            boolean isGenerate = isGenerate();
+
+            if( isGenerate ) {
+
+                generate();
+
+            } else if(isEncode && !isDecode) { //  encode
+
+                encode();
+
+            } else if(isDecode && !isEncode) {  //  decode
+
+                decode();
+
+            } else {
+
+                throw new InvalidParamsException("Choose between encoding, decoding or generating...");
+
             }
-        } catch (IOException e) {
-            System.out.println("Error reading file: " + inputFileName);
+
+        } catch (InvalidParamsException e) {
+            System.out.println(e.getMessage());
             System.exit(1);
         }
 
-        //  encode/decode
 
-        boolean isEncode = isEncode();
-        boolean isDecode = isDecode();
-        boolean isGenerate = isGenerate();
+    }
 
-        byte[] dataToWriteToFile = null;
+    private static void generate() throws InvalidParamsException{
 
+        //  output file
+        String outputFileName = requiresOutputFileName();
+
+        //  distribution
+        Distribution distribution = requiresDistribution();
+
+        //  create generator
+        Generator generator = null;
+        if( distribution == Distribution.Uniform )
+            generator = new UniformGenerator();
+        else if( distribution == Distribution.Gauss )
+            generator = new GaussianGenerator();
+        else if( distribution == Distribution.Laplace ) {
+            generator = new LaplaceGenerator(/*paramMu, paramBeta*/);
+        }
+        else {
+            throw new RuntimeException();
+        }
+
+        try
+        {
+            //  generate
+            BufferedImage generatedData = generator.GenerateImage(500, 500);
+
+            //  write to output file
+            File outputFile = new File( outputFileName );
+            ImageIO.write(generatedData, "bmp", outputFile);
+
+            log("Writing generated data to a file: " + System.getProperty("user.dir") + "/" + outputFileName);
+        }
+        catch ( IOException e )
+        {
+            throw new InvalidParamsException("Error writing to a file: " + outputFileName);
+        }
+    }
+
+    private static void encode() throws InvalidParamsException {
+
+        //  get output file name
+        String outputFileName = requiresOutputFileName();
+
+        //  input file
+        byte[] inputData = requiresInputFile();
+
+        //  compute entropy
+        double inputEntropy = EntropyUtils.computeEntropy(inputData);
+
+        //  start timer
         long startTimeMs = System.currentTimeMillis();
 
-        if( isGenerate )
-        {
-            try
-            {
-                Generator generator = null;
-                if( getDistribution() == Distribution.Uniform )
-                    generator = new UniformGenerator();
-                else if( getDistribution() == Distribution.Gauss )
-                    generator = new GaussianGenerator();
-                else if( getDistribution() == Distribution.Laplace ) {
-                        generator = new LaplaceGenerator(/*paramMu, paramBeta*/);
-                    }
-                else
-                {
-                    System.out.println( "Error: distribution not set" );
-                    System.exit(1);
-                }
+        //  encode data
+        byte[] encodedData  = LZW.encode(inputData);
 
-                BufferedImage image = generator.GenerateImage( 500, 500 );
-                File outputfile = new File( outputFileName );
-                ImageIO.write(image, "bmp", outputfile);
-
-                System.out.println( "Writing image to a file: " + System.getProperty("user.dir") + "/" + outputFileName);
-                System.exit(1);
-            }
-            catch ( IOException e )
-            {
-                System.out.println( e.getMessage() );
-                System.exit(1);
-            }
-        }
-        else if(isEncode && !isDecode) { //  encode
-            //  encode data
-            double inputEntropy = EntropyUtilis.computeEntropy(inputData);
-            dataToWriteToFile = LZW.encode(inputData);
-            testLog(inputFileName + " | " + (1 - ((float) dataToWriteToFile.length / inputData.length)) * 100 + "%");
-            double avgBitLength = (double)inputData.length * 8 / dataToWriteToFile.length;
-            testLog("Entropy vs avg bit length: " + String.format( "%.2f", inputEntropy )  + " " + String.format( "%.2f", avgBitLength ));
-        } else if(isDecode && !isEncode) {  //  decode
-            //  decode data
-            try{
-                dataToWriteToFile = LZW.decode(inputData);
-            } catch(Exception e) {
-                System.out.println("Invalid input file (is this file a compressed one?)");
-                System.exit(1);
-            }
-        } else {
-            System.out.println("Choose between encoding, decoding or generating...");
-            System.exit(1);
-        }
-
+        //  end timer
         long elapsedMs = System.currentTimeMillis() - startTimeMs;
 
+        //  log compression percentage
+        testLog(getInputFileName() + " | " + (1 - ((float) encodedData.length / inputData.length)) * 100 + "%");
+
+        //  compute avg bit length
+        double avgBitLength = (double)inputData.length * 8 / encodedData.length;
+
+        //  log entropy and avg bit length comparison
+        testLog("Entropy vs avg bit length: " + String.format( "%.2f", inputEntropy )  + " " + String.format( "%.2f", avgBitLength ));
+
+        //  write encoded data to output file
+        writeOutput(outputFileName, encodedData);
+
+        //  log time
         log("Operation lasted " + (float) elapsedMs / 1000 + "s");
 
-        //  write to file
+    }
 
-        if(dataToWriteToFile != null) {
-            try {
-                write(outputFileName, dataToWriteToFile);
-            } catch (IOException e) {
-                System.out.println("Error writing to a file: " + outputFileName);
-                System.exit(1);
-            }
+    private static void decode() throws InvalidParamsException {
+
+        //  get output file name
+        String outputFileName = requiresOutputFileName();
+
+        //  input file
+        byte[] inputData = requiresInputFile();
+
+        //  start timer
+        long startTimeMs = System.currentTimeMillis();
+
+        //  decode data
+        byte[] decodedData = LZW.decode(inputData);    //TODO catch invalid input file format (is this file a compressed one?)
+
+        //  end timer
+        long elapsedMs = System.currentTimeMillis() - startTimeMs;
+
+        //  write decoded data to output file
+        if(decodedData != null) {
+            writeOutput(outputFileName, decodedData);
         } else {
-            System.out.println("No data to write");
+            System.out.println("No data to write"); //TODO do not allow decodedData to be null here
             System.exit(1);
         }
 
+        //  log time
+        log("Operation lasted " + (float) elapsedMs / 1000 + "s");
+
     }
 
-    public static void write(String fileName, byte[] data) throws IOException {
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(data);
-        fos.close();
+    private static byte[] requiresInputFile() throws InvalidParamsException {
+        String inputFileName = getInputFileName();
+        try {
+            if(inputFileName != null) {
+                return IOUtils.read(inputFileName);
+            } else {
+                throw new InvalidParamsException("Input file name needs to be specified");
+            }
+        } catch (IOException e) {
+            throw new InvalidParamsException("Error reading file: " + inputFileName);
+        }
     }
 
-    public static byte[] read(String fileName) throws IOException {
-        log("Reading " + fileName + "...");
-        Path path = Paths.get(fileName);
-        return Files.readAllBytes(path);
+    private static String requiresOutputFileName() throws InvalidParamsException {
+        String outputFileName = getOutputFileName();
+        if(outputFileName != null) {
+            return outputFileName;
+        } else {
+            throw new InvalidParamsException("Output file needs to be defined");
+        }
+    }
+
+    private static Distribution requiresDistribution() throws InvalidParamsException {
+        Distribution distribution = getDistribution();
+        if(distribution == Distribution.Unknown || distribution == null) {
+            throw new InvalidParamsException("Distribution needs to be specified");
+        }
+        return distribution;
+    }
+
+    private static void writeOutput(String outputFileName, byte[] output) throws InvalidParamsException {
+        try {
+            IOUtils.write(outputFileName, output);
+        } catch (IOException e) {
+            throw new InvalidParamsException("Error writing to a file: " + outputFileName);
+        }
     }
 
 }
