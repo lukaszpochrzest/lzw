@@ -50,17 +50,15 @@ public class LZWUtility {
             bitSetInd += tempBits.length;
         }
 
-        int padding = bitsPerInt - 1;
+        int padding = 8 - bitSetInd % 8;
         if(padding > 0) {
             for(int i = 0 ; i < padding; ++i) {
                 bitSet.set(bitSetInd + i, true);
             }
         }
 
-        int length = bitSet.length();
-
         byte[] encodedByteArray = bitSet.toByteArray();
-        byte[] result = new byte[encodedByteArray.length + 1];  //  TODO do it more efficient way
+        byte[] result = new byte[encodedByteArray.length + 1];
         result[0] = (byte)bitsPerInt;
         System.arraycopy(encodedByteArray, 0, result, 1, encodedByteArray.length);
         return result;

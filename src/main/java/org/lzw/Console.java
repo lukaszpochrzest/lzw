@@ -119,14 +119,17 @@ public class Console {
         //  end timer
         long elapsedMs = System.currentTimeMillis() - startTimeMs;
 
-        //  log compression percentage
-        Logger.testLog(ProgramParams.getInputFileName() + " | " + (1 - ((float) encodedData.length / inputData.length)) * 100 + "%");
-
         //  compute avg bit length
-        double avgBitLength = (double)inputData.length * 8 / encodedData.length;
+        double avgBitLength = (double)encodedData.length * 8 / inputData.length;
 
-        //  log entropy and avg bit length comparison
-        Logger.testLog("Entropy vs avg bit length: " + String.format("%.2f", inputEntropy) + " " + String.format("%.2f", avgBitLength));
+        //  log results
+        Logger.testLog(
+                ProgramParams.getInputFileName() +
+                        " | " + (1 - ((float) encodedData.length / inputData.length)) * 100 + "%" +
+                        " | " + String.format("%.2f", inputEntropy) +
+                        " | " + String.format("%.2f", avgBitLength)
+        );
+        Logger.log("Entropy vs avg bit length: " + String.format("%.2f", inputEntropy) + " " + String.format("%.2f", avgBitLength));
 
         //  write encoded data to output file
         writeOutput(outputFileName, encodedData);

@@ -52,7 +52,13 @@ public class ProgramParams {
                 ENCODE + "\t" + "encode" + System.lineSeparator() +
                 DECODE + "\t" + "decode" + System.lineSeparator() +
                 VERBOSE + "\t" + "verbose" + System.lineSeparator() +
-                TEST_LOG + "\t" + "test log" + System.lineSeparator();
+//                TEST_LOG + "\t" + "test log" + System.lineSeparator() +
+                System.lineSeparator() +
+                GENERATE + "\t" + "generate random data" + System.lineSeparator() +
+                    "\t" + DISTRIBUTION + "\t" + "distribution" + System.lineSeparator() +
+                        "\t\tgauss" + System.lineSeparator() +
+                        "\t\tlaplace" + System.lineSeparator() +
+                         "\t\tuniform" + System.lineSeparator();
     }
 
     private static ProgramParams pp;
