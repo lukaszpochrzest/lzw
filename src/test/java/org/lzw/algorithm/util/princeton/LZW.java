@@ -1,4 +1,4 @@
-package org.lzw.util.princeton;
+package org.lzw.algorithm.util.princeton;
 
 //Copyright © 2000–2011, Robert Sedgewick and Kevin Wayne.
 //        Last updated: Wed Sep 2 06:45:01 EDT 2015.
@@ -21,7 +21,7 @@ package org.lzw.util.princeton;
  *
  ******************************************************************************/
 
-import org.lzw.util.PrincetonLZWOutput;
+import org.lzw.algorithm.util.PrincetonLZWOutput;
 
 /**
  *  The <tt>LZW</tt> class provides static methods for compressing

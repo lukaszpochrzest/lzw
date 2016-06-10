@@ -1,4 +1,4 @@
-package org.gen;
+package org.lzw.generator;
 
 /**
  * Created by Witek on 2016-05-01.

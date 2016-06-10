@@ -1,5 +1,6 @@
-package org.lzw;
+package org.lzw.algorithm;
 
+import org.lzw.EntropyUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

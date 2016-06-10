@@ -42,7 +42,4 @@ public class EntropyUtils {
         return Math.log(i)/Math.log(2);
     }
 
-
-
-
 }

@@ -1,9 +1,9 @@
-package org.lzw;
+package org.lzw.algorithm;
 
+import org.lzw.algorithm.util.princeton.BinaryStdIn;
 import org.junit.Assert;
 import org.junit.Test;
-import org.lzw.util.PrincetonLZWOutput;
-import org.lzw.util.princeton.BinaryStdIn;
+import org.lzw.algorithm.util.PrincetonLZWOutput;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -40,14 +40,14 @@ public class LZWTest {
         int bitsPerInt = encodedData[0];
         byte[] encodedDataWithOutFirstByte = new byte[encodedData.length-1];
         System.arraycopy(encodedData, 1, encodedDataWithOutFirstByte, 0, encodedData.length - 1);
-        int[] decodedInts = LZWUtility.indexesFromPrunedByteArray(encodedDataWithOutFirstByte, bitsPerInt);
+        int[] decodedInts = LZWUtility.indexesFromPrunedEncodedDataByteArray(encodedDataWithOutFirstByte, bitsPerInt);
 
         Assert.assertTrue(Arrays.equals(intArr, decodedInts));
 
     }
 
     @Test
-    public void encodeDecodeTest() {
+    public void encodeDecodeTest() throws Exception {
 
         /** prepare test data   **/
         String dataString = WIKI_DATA_EXAMPLE;
@@ -63,11 +63,12 @@ public class LZWTest {
 
         /** check   **/
         Assert.assertTrue(dataString.equals(resultString));
+        Assert.assertArrayEquals(data, decodedData);
 
     }
 
     @Test
-    public void compareImplementationToPrincetonTest() {
+    public void compareImplementationToPrincetonTest() throws Exception {
 
         /** prepare test data   **/
         String dataString = WIKI_DATA_EXAMPLE;
@@ -78,7 +79,7 @@ public class LZWTest {
         List<Integer> myLZWResult = LZW.indexes;
 
         BinaryStdIn.setIn(new BufferedInputStream(new ByteArrayInputStream(data)));
-        org.lzw.util.princeton.LZW.compress();
+        org.lzw.algorithm.util.princeton.LZW.compress();
         List<Integer> princetonLZWResult = PrincetonLZWOutput.getEncodingOutput();
 
         /** check   **/

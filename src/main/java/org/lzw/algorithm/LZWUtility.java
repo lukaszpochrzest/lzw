@@ -1,10 +1,11 @@
-package org.lzw;
+package org.lzw.algorithm;
+
+import org.lzw.Logger;
+import org.lzw.exception.InvalidInputEncodedDataFileException;
 
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
-
-import static org.lzw.Logger.log;
 
 /**
  * Created by lukasz on 06.03.16.
@@ -12,7 +13,7 @@ import static org.lzw.Logger.log;
 public class LZWUtility {
 
     public static byte[] indexesToByteArray(final List<Integer> indexes) {
-        assert(indexes.size() > 0); //  TODO remove assert
+        assert(indexes.size() > 0);
 
         //  find out greatest index value
         Integer maxIndex = Integer.MIN_VALUE;
@@ -29,9 +30,9 @@ public class LZWUtility {
             maxIndex = maxIndex >> 1;
         }
 
-        assert(bitsPerInt > 0); //  TODO remove assert
+        assert(bitsPerInt > 0);
 
-        log("Encoding " + indexes.size() + " indexes with " + bitsPerInt + " bits per index");
+        Logger.log("Encoding " + indexes.size() + " indexes with " + bitsPerInt + " bits per index");
 
         //  lets write ints to bytearray in optimal way
         BitSet bitSet = new BitSet(indexes.size() * bitsPerInt);
@@ -40,7 +41,7 @@ public class LZWUtility {
         boolean[] tempBits = new boolean[bitsPerInt];
         for(Integer index : indexes) {
             for (int i = bitsPerInt - 1; i >= 0; --i) {
-                boolean bit = (index & (1 << i)) != 0;  //  TODO check if it works in both LittleEndian and BigEndian?
+                boolean bit = (index & (1 << i)) != 0;
                 tempBits[i] = bit;
             }
             for(int k = 0; k < tempBits.length; ++k) {
@@ -49,6 +50,15 @@ public class LZWUtility {
             bitSetInd += tempBits.length;
         }
 
+        int padding = bitsPerInt - 1;
+        if(padding > 0) {
+            for(int i = 0 ; i < padding; ++i) {
+                bitSet.set(bitSetInd + i, true);
+            }
+        }
+
+        int length = bitSet.length();
+
         byte[] encodedByteArray = bitSet.toByteArray();
         byte[] result = new byte[encodedByteArray.length + 1];  //  TODO do it more efficient way
         result[0] = (byte)bitsPerInt;
@@ -56,17 +66,20 @@ public class LZWUtility {
         return result;
     }
 
-    public static int[] indexesFromByteArray(final byte[] data) {
-        assert(data.length >= 2);   //  TODO remove assert
+    public static int[] indexesFromEncodedDataByteArray(final byte[] data) throws InvalidInputEncodedDataFileException {
+        if(data.length < 2) {
+            throw new InvalidInputEncodedDataFileException("Invalid encoded file");
+        }
         int bitsPerInt = data[0];
         if(bitsPerInt < 0) {
-            throw new IllegalArgumentException("Number of bits per int must be > 0");
+            throw new InvalidInputEncodedDataFileException("Number of bits per int must be > 0");
         }
         byte[] intsByteArray = Arrays.copyOfRange(data, 1, data.length);    //  TODO find more efficient way
-        return indexesFromPrunedByteArray(intsByteArray, bitsPerInt);
+        return indexesFromPrunedEncodedDataByteArray(intsByteArray, bitsPerInt);
     }
 
-    static int[] indexesFromPrunedByteArray(final byte[] intsByteArray, final int bitsPerInt) {
+    //  package visibility for test purposes
+    static int[] indexesFromPrunedEncodedDataByteArray(final byte[] intsByteArray, final int bitsPerInt) {
 
         int[] resultInts = new int[ (intsByteArray.length * 8) / bitsPerInt];
 
@@ -77,7 +90,7 @@ public class LZWUtility {
 
             int newInt = 0;
             for(int newIntInd = 0; newIntInd < bitsPerInt; ++newIntInd) {
-                newInt += bitSet.get(newIntInd + bitSetInd) ? (1 << newIntInd) : 0; //  TODO check if it works in both LittleEndian and BigEndian?
+                newInt += bitSet.get(newIntInd + bitSetInd) ? (1 << newIntInd) : 0;
             }
             resultInts[resultIntsInd++] = newInt;
 

@@ -1,4 +1,4 @@
-package org.exception;
+package org.lzw.exception;
 
 /**
  * Created by lukasz on 10.06.16.

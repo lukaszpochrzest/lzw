@@ -1,4 +1,4 @@
-package org.lzw.util.princeton;
+package org.lzw.algorithm.util.princeton;
 
 //Copyright © 2000–2011, Robert Sedgewick and Kevin Wayne.
 //        Last updated: Wed Sep 2 06:45:01 EDT 2015.
@@ -41,7 +41,6 @@ package org.lzw.util.princeton;
  ******************************************************************************/
 
 import java.util.LinkedList;
-import java.util.PriorityQueue;
 import java.util.Queue;
 
 /**

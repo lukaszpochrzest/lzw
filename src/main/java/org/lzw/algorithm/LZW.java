@@ -1,28 +1,29 @@
-package org.lzw;
+package org.lzw.algorithm;
 
-import org.exception.InvalidParamsException;
+import org.lzw.exception.InvalidParamsException;
+import org.lzw.exception.InvalidInputEncodedDataFileException;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.lzw.LZWUtility.*;
 import static org.lzw.Logger.log;
+import static org.lzw.algorithm.LZWUtility.*;
 
 /**
  * Created by lukasz on 03.03.16.
  */
 public final class LZW {
 
-    //for test purposes
+    //  package visibility for test purposes
     static LinkedList<Integer> indexes;
 
-    public static byte[] encode(final byte[] data) {
+    public static byte[] encode(final byte[] data) throws InvalidParamsException {
         if(data == null) {
-            throw new IllegalArgumentException("Data to encode can not be null");
+            throw new InvalidParamsException("Data to encode can not be null");
         }
 
         if(data.length == 0) {
-            return new byte[0];
+            throw new InvalidParamsException("Data to encode can not be of 0 byte length");
         }
 
         /** lets start encoding    **/
@@ -42,7 +43,6 @@ public final class LZW {
             //  read s symbol
             byte s = data[i];
 
-//            if(contains(dictionary, c, s)) {
             if(dictionary.contains(c, s)) {
                 //   c := c + s
                 c.add(s);
@@ -60,7 +60,7 @@ public final class LZW {
             ++i;
         }
 
-        //  int the end, push code(index) of c to output
+        //  in the end, push code(index) of c to output
         indexes.add(dictionary.getIndexOf(c));
 
         byte[] resultByteArray = indexesToByteArray(indexes);
@@ -71,7 +71,7 @@ public final class LZW {
         return resultByteArray;
     }
 
-    public static byte[] decode(byte[] encodedData) throws InvalidParamsException {
+    public static byte[] decode(byte[] encodedData) throws InvalidParamsException, InvalidInputEncodedDataFileException {
 
         if(encodedData == null) {
             throw new InvalidParamsException("Encoded data can not be null");
@@ -82,13 +82,13 @@ public final class LZW {
         }
 
         //  get indexes
-        int[] indexes = indexesFromByteArray(encodedData);
+        int[] indexes = indexesFromEncodedDataByteArray(encodedData);
 
         /** lets start decoding **/
 
         LinkedList<List<Byte>> result = new LinkedList<>();
 
-        //  fill dict with source data alphabet //  TODO decide whether to use encodedData dict or i.e. ascii table
+        //  fill dict with source data alphabet //
         DecodingDictionary decodingDictionary = new DecodingDictionary();
 
         //  pk := first code of compressed data

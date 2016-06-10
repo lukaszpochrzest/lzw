@@ -1,10 +1,9 @@
-package org.gen;
+package org.lzw.generator;
 
 /**
  * Created by Witek on 2016-05-01.
  */
 import java.awt.image.BufferedImage;
-import java.nio.Buffer;
 
 public abstract class Generator
 {

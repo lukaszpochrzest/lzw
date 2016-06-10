@@ -1,4 +1,4 @@
-package org.lzw;
+package org.lzw.algorithm;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class EncodingDictionary {
 
-    private static final int INITIAL_DICTIONARY_INTERNAL_SIZE = 1 << 12;    //aka 4096
+    private static final int INITIAL_DICTIONARY_INTERNAL_SIZE = 4096;
 
     protected static final int INITIAL_INDEX = 256;
 

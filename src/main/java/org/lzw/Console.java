@@ -1,19 +1,17 @@
 package org.lzw;
 
-import org.exception.InvalidParamsException;
-import org.gen.GaussianGenerator;
-import org.gen.Generator;
-import org.gen.LaplaceGenerator;
-import org.gen.UniformGenerator;
+import org.lzw.algorithm.LZW;
+import org.lzw.exception.InvalidInputEncodedDataFileException;
+import org.lzw.exception.InvalidParamsException;
+import org.lzw.generator.GaussianGenerator;
+import org.lzw.generator.LaplaceGenerator;
+import org.lzw.generator.UniformGenerator;
+import org.lzw.generator.Generator;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
-import static org.lzw.Logger.log;
-import static org.lzw.Logger.testLog;
-import static org.lzw.ProgramParams.*;
 
 
 /**
@@ -22,21 +20,21 @@ import static org.lzw.ProgramParams.*;
 public class Console {
 
     public static void main (String[] args) {
-        parse(args);
+        ProgramParams.parse(args);
 
         //  help ?
 
-        if(isHelp()) {
-            System.out.println(paramsDescription());
+        if(ProgramParams.isHelp()) {
+            System.out.println(ProgramParams.paramsDescription());
             System.exit(0);
         }
 
         try {
             //  encode/decode/generate ?
 
-            boolean isEncode = isEncode();
-            boolean isDecode = isDecode();
-            boolean isGenerate = isGenerate();
+            boolean isEncode = ProgramParams.isEncode();
+            boolean isDecode = ProgramParams.isDecode();
+            boolean isGenerate = ProgramParams.isGenerate();
 
             if( isGenerate ) {
 
@@ -56,11 +54,10 @@ public class Console {
 
             }
 
-        } catch (InvalidParamsException e) {
+        } catch (InvalidParamsException | InvalidInputEncodedDataFileException e) {
             System.out.println(e.getMessage());
             System.exit(1);
         }
-
 
     }
 
@@ -70,15 +67,15 @@ public class Console {
         String outputFileName = requiresOutputFileName();
 
         //  distribution
-        Distribution distribution = requiresDistribution();
+        ProgramParams.Distribution distribution = requiresDistribution();
 
         //  create generator
         Generator generator = null;
-        if( distribution == Distribution.Uniform )
+        if( distribution == ProgramParams.Distribution.Uniform )
             generator = new UniformGenerator();
-        else if( distribution == Distribution.Gauss )
+        else if( distribution == ProgramParams.Distribution.Gauss )
             generator = new GaussianGenerator();
-        else if( distribution == Distribution.Laplace ) {
+        else if( distribution == ProgramParams.Distribution.Laplace ) {
             generator = new LaplaceGenerator(/*paramMu, paramBeta*/);
         }
         else {
@@ -94,7 +91,7 @@ public class Console {
             File outputFile = new File( outputFileName );
             ImageIO.write(generatedData, "bmp", outputFile);
 
-            log("Writing generated data to a file: " + System.getProperty("user.dir") + "/" + outputFileName);
+            Logger.log("Writing generated data to a file: " + System.getProperty("user.dir") + "/" + outputFileName);
         }
         catch ( IOException e )
         {
@@ -123,23 +120,23 @@ public class Console {
         long elapsedMs = System.currentTimeMillis() - startTimeMs;
 
         //  log compression percentage
-        testLog(getInputFileName() + " | " + (1 - ((float) encodedData.length / inputData.length)) * 100 + "%");
+        Logger.testLog(ProgramParams.getInputFileName() + " | " + (1 - ((float) encodedData.length / inputData.length)) * 100 + "%");
 
         //  compute avg bit length
         double avgBitLength = (double)inputData.length * 8 / encodedData.length;
 
         //  log entropy and avg bit length comparison
-        testLog("Entropy vs avg bit length: " + String.format( "%.2f", inputEntropy )  + " " + String.format( "%.2f", avgBitLength ));
+        Logger.testLog("Entropy vs avg bit length: " + String.format("%.2f", inputEntropy) + " " + String.format("%.2f", avgBitLength));
 
         //  write encoded data to output file
         writeOutput(outputFileName, encodedData);
 
         //  log time
-        log("Operation lasted " + (float) elapsedMs / 1000 + "s");
+        Logger.log("Operation lasted " + (float) elapsedMs / 1000 + "s");
 
     }
 
-    private static void decode() throws InvalidParamsException {
+    private static void decode() throws InvalidParamsException, InvalidInputEncodedDataFileException {
 
         //  get output file name
         String outputFileName = requiresOutputFileName();
@@ -165,12 +162,12 @@ public class Console {
         }
 
         //  log time
-        log("Operation lasted " + (float) elapsedMs / 1000 + "s");
+        Logger.log("Operation lasted " + (float) elapsedMs / 1000 + "s");
 
     }
 
     private static byte[] requiresInputFile() throws InvalidParamsException {
-        String inputFileName = getInputFileName();
+        String inputFileName = ProgramParams.getInputFileName();
         try {
             if(inputFileName != null) {
                 return IOUtils.read(inputFileName);
@@ -183,7 +180,7 @@ public class Console {
     }
 
     private static String requiresOutputFileName() throws InvalidParamsException {
-        String outputFileName = getOutputFileName();
+        String outputFileName = ProgramParams.getOutputFileName();
         if(outputFileName != null) {
             return outputFileName;
         } else {
@@ -191,9 +188,9 @@ public class Console {
         }
     }
 
-    private static Distribution requiresDistribution() throws InvalidParamsException {
-        Distribution distribution = getDistribution();
-        if(distribution == Distribution.Unknown || distribution == null) {
+    private static ProgramParams.Distribution requiresDistribution() throws InvalidParamsException {
+        ProgramParams.Distribution distribution = ProgramParams.getDistribution();
+        if(distribution == ProgramParams.Distribution.Unknown || distribution == null) {
             throw new InvalidParamsException("Distribution needs to be specified");
         }
         return distribution;

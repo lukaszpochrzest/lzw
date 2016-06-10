@@ -1,4 +1,4 @@
-package org.gen;
+package org.lzw.generator;
 
 import java.util.concurrent.ThreadLocalRandom;
 

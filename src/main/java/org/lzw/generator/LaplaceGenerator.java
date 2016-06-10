@@ -1,4 +1,4 @@
-package org.gen;
+package org.lzw.generator;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.log;
