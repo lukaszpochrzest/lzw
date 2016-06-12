@@ -119,7 +119,8 @@ public class Console {
         long elapsedMs = System.currentTimeMillis() - startTimeMs;
 
         //  compute avg bit length
-        double avgBitLength = AvgBitLengthUtils.computeAvgBitLength(inputData, Byte.toUnsignedInt(encodedData[0]), lzwEncoder.getIndexes(), lzwEncoder.getDictionary());
+//        double avgBitLength = AvgBitLengthUtils.computeAvgBitLength(inputData, Byte.toUnsignedInt(encodedData[0]), lzwEncoder.getIndexes(), lzwEncoder.getDictionary());
+        double avgBitLength = AvgBitLengthUtils.computeAvgBitLength(/*inputData, */Byte.toUnsignedInt(encodedData[0]), lzwEncoder.getIndexes(), lzwEncoder.getDictionary());
 
         //  log results
         Logger.testLog(
