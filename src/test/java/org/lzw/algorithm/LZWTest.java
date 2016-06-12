@@ -54,10 +54,10 @@ public class LZWTest {
         byte[] data = dataString.getBytes(StandardCharsets.UTF_8);
 
         /** encoding **/
-        byte[] encodedData = LZW.encode(data);
+        byte[] encodedData = new LZWEncoder().encode(data);
 
         /** decoding **/
-        byte[] decodedData = LZW.decode(encodedData);
+        byte[] decodedData = new LZWDecoder().decode(encodedData);
 
         String resultString = new String(decodedData, StandardCharsets.UTF_8);
 
@@ -75,8 +75,9 @@ public class LZWTest {
         byte[] data = dataString.getBytes(StandardCharsets.UTF_8);
 
         /** encoding **/
-        LZW.encode(data);
-        List<Integer> myLZWResult = LZW.indexes;
+        LZWEncoder lzwEncoder = new LZWEncoder();
+        lzwEncoder.encode(data);
+        List<Integer> myLZWResult = lzwEncoder.indexes;
 
         BinaryStdIn.setIn(new BufferedInputStream(new ByteArrayInputStream(data)));
         org.lzw.algorithm.util.princeton.LZW.compress();

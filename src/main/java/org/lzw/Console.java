@@ -1,12 +1,10 @@
 package org.lzw;
 
-import org.lzw.algorithm.LZW;
+import org.lzw.algorithm.LZWDecoder;
+import org.lzw.algorithm.LZWEncoder;
 import org.lzw.exception.InvalidInputEncodedDataFileException;
 import org.lzw.exception.InvalidParamsException;
-import org.lzw.generator.GaussianGenerator;
-import org.lzw.generator.LaplaceGenerator;
-import org.lzw.generator.UniformGenerator;
-import org.lzw.generator.Generator;
+import org.lzw.generator.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -114,13 +112,14 @@ public class Console {
         long startTimeMs = System.currentTimeMillis();
 
         //  encode data
-        byte[] encodedData  = LZW.encode(inputData);
+        LZWEncoder lzwEncoder = new LZWEncoder();
+        byte[] encodedData  = lzwEncoder.encode(inputData);
 
         //  end timer
         long elapsedMs = System.currentTimeMillis() - startTimeMs;
 
         //  compute avg bit length
-        double avgBitLength = (double)encodedData.length * 8 / inputData.length;
+        double avgBitLength = AvgBitLengthUtils.computeAvgBitLength(inputData, Byte.toUnsignedInt(encodedData[0]), lzwEncoder.getIndexes(), lzwEncoder.getDictionary());
 
         //  log results
         Logger.testLog(
@@ -151,7 +150,7 @@ public class Console {
         long startTimeMs = System.currentTimeMillis();
 
         //  decode data
-        byte[] decodedData = LZW.decode(inputData);    //TODO catch invalid input file format (is this file a compressed one?)
+        byte[] decodedData = new LZWDecoder().decode(inputData);
 
         //  end timer
         long elapsedMs = System.currentTimeMillis() - startTimeMs;
@@ -160,7 +159,7 @@ public class Console {
         if(decodedData != null) {
             writeOutput(outputFileName, decodedData);
         } else {
-            System.out.println("No data to write"); //TODO do not allow decodedData to be null here
+            System.out.println("No data to write");
             System.exit(1);
         }
 
